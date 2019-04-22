@@ -1,0 +1,18 @@
+<?php
+
+namespace DummyNamespace;
+
+use bigdropinc\LaravelInteractions\Interaction;
+
+class DummyInteraction extends Interaction
+{
+    public function rules()
+    {
+        return [];
+    }
+
+    protected function execute()
+    {
+        // TODO: Implement execute() method.
+    }
+}
