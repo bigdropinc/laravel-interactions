@@ -27,6 +27,7 @@ abstract class Interaction
         $this->params = $params;
         $this->prepareForValidation();
         $this->validator = Validator::make($this->params, $this->rules());
+        $this->filterData();
     }
 
     public function __set($key, $value)
@@ -82,8 +83,13 @@ abstract class Interaction
         return $interaction;
     }
 
-    protected function prepareForValidation()
-    {
+    protected function prepareForValidation(){}
 
+    protected function filterData()
+    {
+        $rules = $this->validator->getRules();
+        foreach (array_diff_key($this->params, array_flip(array_keys($rules))) as $key => $extra) {
+            unset($this->params[$key]);
+        }
     }
 }
