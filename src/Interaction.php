@@ -87,9 +87,16 @@ abstract class Interaction
 
     protected function filterData()
     {
+        $params = $this->params;
         $rules = $this->validator->getRules();
-        foreach (array_diff_key($this->params, array_flip(array_keys($rules))) as $key => $extra) {
-            unset($this->params[$key]);
+
+        foreach (array_keys($rules) as $key => $rule) {
+            $exist = data_get($params, $rule);
+            if (null === $exist) {
+                $params = array_except($params, $rule);
+            }
         }
+
+        $this->params = $params;
     }
 }
