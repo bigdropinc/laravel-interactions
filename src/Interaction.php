@@ -24,10 +24,9 @@ abstract class Interaction
 
     public function __construct(array $params = [])
     {
-        $this->params = $params;
+        $this->params = $this->filterParams($params);
         $this->prepareForValidation();
         $this->validator = Validator::make($this->params, $this->rules());
-        $this->filterData();
     }
 
     public function __set($key, $value)
@@ -85,18 +84,14 @@ abstract class Interaction
 
     protected function prepareForValidation(){}
 
-    protected function filterData()
+    protected function filterParams($params)
     {
-        $params = $this->params;
-        $rules = $this->validator->getRules();
-
-        foreach (array_keys($rules) as $key => $rule) {
-            $exist = data_get($params, $rule);
-            if (null === $exist) {
-                $params = array_except($params, $rule);
+        foreach (array_keys($params) as $key => $value) {
+            if (null === data_get($this->rules(), $value)) {
+                $params = array_except($params, $value);
             }
         }
 
-        $this->params = $params;
+        return $params;
     }
 }
