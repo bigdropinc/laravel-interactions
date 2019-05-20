@@ -87,8 +87,9 @@ abstract class Interaction
     protected function filterParams($params)
     {
         $this->params = $params;
+        $rules = $this->rules();
         foreach (array_keys($params) as $key => $value) {
-            if (null === data_get($this->rules(), $value)) {
+            if (null === data_get($rules, $value)) {
                 $params = array_except($params, $value);
             }
         }
