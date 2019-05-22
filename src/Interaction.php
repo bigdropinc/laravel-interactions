@@ -37,9 +37,10 @@ abstract class Interaction
     public function __get($key)
     {
         if (!empty($this->params) && array_key_exists($key, $this->params)) {
-            return $this->params[$key];
+            return $this->params[$key] ?? null;
         }
-        return NULL;
+
+        return null;
     }
 
     public function __isset($key)
@@ -82,7 +83,9 @@ abstract class Interaction
         return $interaction;
     }
 
-    protected function prepareForValidation(){}
+    protected function prepareForValidation()
+    {
+    }
 
     protected function filterParams($params)
     {
