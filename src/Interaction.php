@@ -3,7 +3,9 @@
 namespace bigdropinc\LaravelInteractions;
 
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\MessageBag;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -12,32 +14,42 @@ use Illuminate\Validation\ValidationException;
  */
 abstract class Interaction
 {
-    public $valid;
-    public $result;
     /**
-     * @var \Illuminate\Support\MessageBag
+     * @var \Illuminate\Contracts\Validation\Validator
      */
-    public $errors;
-
     protected $validator;
-    protected $params = [];
+    protected $exception = true;
 
-    public function __construct(array $params = [])
+    private $_valid = false;
+    private $_result;
+    private $_attributes = [];
+
+    /**
+     * Interaction constructor.
+     * @param array $attributes
+     * @param bool $exception
+     */
+    public function __construct(array $attributes = [], $exception = true)
     {
-        $this->filterParams($params);
+        $this->exception = $exception;
+        $this->filterAttributes($attributes);
         $this->prepareForValidation();
-        $this->validator = Validator::make($this->params, $this->rules());
+        $this->validator = Validator::make($this->_attributes, $this->rules());
     }
 
     public function __set($key, $value)
     {
-        $this->params[$key] = $value;
+        if (array_key_exists($key, $this->_attributes)) {
+            $this->_attributes[$key] = $value;
+        } else {
+            $this->$key = $value;
+        }
     }
 
     public function __get($key)
     {
-        if (!empty($this->params) && array_key_exists($key, $this->params)) {
-            return $this->params[$key] ?? null;
+        if (!empty($this->_attributes) && array_key_exists($key, $this->_attributes)) {
+            return $this->_attributes[$key] ?? null;
         }
 
         return null;
@@ -45,7 +57,33 @@ abstract class Interaction
 
     public function __isset($key)
     {
-        return isset($this->params[$key]);
+        if (array_key_exists($key, $this->_attributes)) {
+            return isset($this->_attributes[$key]);
+        }
+
+        return isset($this->$key);
+    }
+
+    /**
+     * @return Interaction
+     * @throws ValidationException
+     */
+    public function run()
+    {
+        if (!$this->validator->fails()) {
+            $this->beforeExecute();
+            $this->_result = $this->execute();
+            $this->afterExecute();
+            $this->_valid = $this->validator->errors()->isEmpty();
+        } else {
+            $this->_valid = false;
+        }
+
+        if (!$this->_valid && $this->exception) {
+            throw new ValidationException($this->validator);
+        }
+
+        return $this;
     }
 
     /**
@@ -58,45 +96,60 @@ abstract class Interaction
 
     abstract protected function execute();
 
-    /**
-     * @param array $params
-     * @param bool $exception
-     * @return Interaction
-     * @throws ValidationException
-     */
-    public static function run(array $params = [], $exception = true)
-    {
-        $interaction = new static($params);
-        if (!$interaction->validator->fails()) {
-            $interaction->result = $interaction->execute();
-            $interaction->valid = $interaction->validator->errors()->isEmpty();
-        } else {
-            $interaction->valid = false;
-        }
-
-        if ($exception && !$interaction->valid) {
-            throw new ValidationException($interaction->validator);
-        }
-
-        $interaction->errors = $interaction->validator->errors();
-
-        return $interaction;
-    }
-
     protected function prepareForValidation()
     {
     }
 
-    protected function filterParams($params)
+    protected function beforeExecute()
     {
-        $this->params = $params;
+    }
+
+    protected function afterExecute()
+    {
+    }
+
+    protected function filterAttributes($attributes)
+    {
+        $filtered = $attributes;
         $rules = $this->rules();
-        foreach (array_keys($params) as $key => $value) {
-            if (null === data_get($rules, $value)) {
-                $params = array_except($params, $value);
+        foreach ($attributes as $key => $value) {
+            if (null === data_get($rules, $key)) {
+                $filtered = array_except($filtered, $key);
             }
         }
 
-        $this->params = $params;
+        $this->_attributes = $filtered;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getResult()
+    {
+        return $this->_result;
+    }
+
+    /**
+     * @return MessageBag
+     */
+    public function getErrors()
+    {
+        return $this->validator->errors();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isValid()
+    {
+        return $this->_valid;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAttributes()
+    {
+        return $this->_attributes;
     }
 }

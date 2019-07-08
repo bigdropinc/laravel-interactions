@@ -6,7 +6,7 @@ use bigdropinc\LaravelInteractions\Interaction;
 
 class DummyInteraction extends Interaction
 {
-    public function rules()
+    protected function rules()
     {
         return [];
     }
