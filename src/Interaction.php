@@ -110,15 +110,14 @@ abstract class Interaction
 
     protected function filterAttributes($attributes)
     {
-        $filtered = $attributes;
+        $this->_attributes = $attributes;
+
         $rules = $this->rules();
         foreach ($attributes as $key => $value) {
             if (null === data_get($rules, $key)) {
-                $filtered = array_except($filtered, $key);
+                $this->_attributes = array_except($this->_attributes, $key);
             }
         }
-
-        $this->_attributes = $filtered;
     }
 
     /**
