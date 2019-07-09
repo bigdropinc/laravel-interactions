@@ -24,7 +24,7 @@ abstract class Interaction
     private $_result;
     private $_attributes = [];
 
-    private static $allowableAttributes = [];
+    private $allowableAttributes = [];
 
     /**
      * Interaction constructor.
@@ -127,11 +127,11 @@ abstract class Interaction
      */
     protected function getAllowedAttributes()
     {
-        if (empty(self::$allowableAttributes)) {
-            self::$allowableAttributes = array_keys($this->rules());
+        if (empty($this->allowableAttributes)) {
+            $this->allowableAttributes = array_keys($this->rules());
         }
 
-        return self::$allowableAttributes;
+        return $this->allowableAttributes;
     }
 
     /**
