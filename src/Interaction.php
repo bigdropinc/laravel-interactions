@@ -24,6 +24,8 @@ abstract class Interaction
     private $_result;
     private $_attributes = [];
 
+    private static $allowableAttributes = [];
+
     /**
      * Interaction constructor.
      * @param array $attributes
@@ -39,7 +41,7 @@ abstract class Interaction
 
     public function __set($key, $value)
     {
-        if (array_key_exists($key, $this->_attributes)) {
+        if (\in_array($key, $this->getAllowedAttributes())) {
             $this->_attributes[$key] = $value;
         } else {
             $this->$key = $value;
@@ -118,6 +120,18 @@ abstract class Interaction
                 $this->_attributes = array_except($this->_attributes, $key);
             }
         }
+    }
+
+    /**
+     * @return array
+     */
+    protected function getAllowedAttributes()
+    {
+        if (empty(self::$allowableAttributes)) {
+            self::$allowableAttributes = array_keys($this->rules());
+        }
+
+        return self::$allowableAttributes;
     }
 
     /**
