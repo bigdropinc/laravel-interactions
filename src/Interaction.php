@@ -3,7 +3,6 @@
 namespace bigdropinc\LaravelInteractions;
 
 
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\MessageBag;
 use Illuminate\Validation\ValidationException;
@@ -41,7 +40,7 @@ abstract class Interaction
 
     public function __set($key, $value)
     {
-        if (\in_array($key, $this->getAllowedAttributes())) {
+        if (\in_array($key, $this->getAllowableAttributes())) {
             $this->_attributes[$key] = $value;
         } else {
             $this->$key = $value;
@@ -50,16 +49,16 @@ abstract class Interaction
 
     public function __get($key)
     {
-        if (!empty($this->_attributes) && array_key_exists($key, $this->_attributes)) {
+        if (\in_array($key, $this->getAllowableAttributes())) {
             return $this->_attributes[$key] ?? null;
         }
 
-        return null;
+        return $this->$key;
     }
 
     public function __isset($key)
     {
-        if (array_key_exists($key, $this->_attributes)) {
+        if (\in_array($key, $this->getAllowableAttributes())) {
             return isset($this->_attributes[$key]);
         }
 
@@ -125,7 +124,7 @@ abstract class Interaction
     /**
      * @return array
      */
-    protected function getAllowedAttributes()
+    protected function getAllowableAttributes()
     {
         if (empty($this->allowableAttributes)) {
             $this->allowableAttributes = array_keys($this->rules());
