@@ -113,9 +113,9 @@ abstract class Interaction
     {
         $this->_attributes = $attributes;
 
-        $rules = $this->rules();
+        $rules = $this->getAllowableAttributes();
         foreach ($attributes as $key => $value) {
-            if (null === data_get($rules, $key)) {
+            if (!in_array($key, $rules)) {
                 $this->_attributes = array_except($this->_attributes, $key);
             }
         }
@@ -127,7 +127,7 @@ abstract class Interaction
     protected function getAllowableAttributes()
     {
         if (empty($this->allowableAttributes)) {
-            $this->allowableAttributes = array_keys($this->rules());
+            $this->allowableAttributes = array_keys(@$this->rules());
         }
 
         return $this->allowableAttributes;
