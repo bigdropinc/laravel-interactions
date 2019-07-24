@@ -66,6 +66,16 @@ abstract class Interaction
     }
 
     /**
+     * @param array $attributes
+     * @param bool $exception
+     * @return Interaction
+     */
+    public static function create(array $attributes = [], $exception = true)
+    {
+        return new static($attributes, $exception);
+    }
+
+    /**
      * @return Interaction
      * @throws ValidationException
      */
