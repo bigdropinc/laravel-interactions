@@ -14,7 +14,7 @@ The preferred way to install this extension is through [composer](http://getcomp
 Either run
 
 ```
-composer require bigdropinc/laravel-interactions "*"
+composer require bigdropinc/laravel-interactions "~1.0.0"
 ```
 
 or add
@@ -32,4 +32,4 @@ Usage
 Once the extension is installed, simply use it in your code by  :
 
 ```php
-Interaction::run(request()->all());
+Interaction::create(request()->all())->run();
