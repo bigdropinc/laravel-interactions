@@ -18,6 +18,7 @@ abstract class Interaction
      */
     protected $validator;
     protected $exception = true;
+    protected $messages = [];
 
     private $_valid = false;
     private $_result;
@@ -35,7 +36,7 @@ abstract class Interaction
         $this->exception = $exception;
         $this->filterAttributes($attributes);
         $this->prepareForValidation();
-        $this->validator = Validator::make($this->_attributes, $this->rules());
+        $this->validator = Validator::make($this->_attributes, $this->rules(), $this->messages);
     }
 
     public function __set($key, $value)
