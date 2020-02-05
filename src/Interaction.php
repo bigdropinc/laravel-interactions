@@ -3,6 +3,7 @@
 namespace bigdropinc\LaravelInteractions;
 
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\MessageBag;
 use Illuminate\Validation\ValidationException;
@@ -128,7 +129,7 @@ abstract class Interaction
         $rules = $this->getAllowableAttributes();
         foreach ($attributes as $key => $value) {
             if (!in_array($key, $rules)) {
-                $this->_attributes = array_except($this->_attributes, $key);
+                $this->_attributes = Arr::except($this->_attributes, $key);
             }
         }
     }
