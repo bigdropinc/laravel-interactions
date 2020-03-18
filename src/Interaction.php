@@ -26,8 +26,8 @@ abstract class Interaction
     private $_result;
     private $_attributes = [];
 
-    protected $allowableAttributes = [];
-    protected $rulesCache = [];
+    private $allowableAttributes = [];
+
     /**
      * Interaction constructor.
      * @param array $attributes
@@ -35,11 +35,10 @@ abstract class Interaction
      */
     public function __construct(array $attributes = [], $exception = true)
     {
-        $this->rulesCache = $this->rules();
         $this->exception = $exception;
         $this->filterAttributes($attributes);
         $this->prepareForValidation();
-        $this->validator = Validator::make($this->_attributes, $this->rulesCache, $this->messages, $this->customAttributes);
+        $this->validator = Validator::make($this->_attributes, $this->rules(), $this->messages, $this->customAttributes);
     }
 
     public function __set($key, $value)
@@ -141,7 +140,7 @@ abstract class Interaction
     protected function getAllowableAttributes()
     {
         if (empty($this->allowableAttributes)) {
-            $this->allowableAttributes = array_keys(@$this->rulesCache);
+            $this->allowableAttributes = array_keys(@$this->rules());
         }
 
         return $this->allowableAttributes;
